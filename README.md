@@ -2,4 +2,4 @@
 
 **Under developement**
 
-**Snippet** is a code fast snippet manager written in **Typescript** and uses **RedisIO**
+**Snippet** is a fast code snippet manager written in **Typescript** and uses **RedisIO**
