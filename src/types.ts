@@ -123,3 +123,4 @@ export class CreateTeamInput{
     @Field({nullable:true})
     organisation?: string;
 }
+

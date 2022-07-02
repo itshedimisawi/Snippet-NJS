@@ -1,3 +1,4 @@
+import { DateTimeResolver } from 'graphql-scalars';
 import {Field, ObjectType} from 'type-graphql'
 
 @ObjectType()
@@ -21,4 +22,19 @@ export class Snippet{
     @Field(()=>Boolean)
     isPrivate!: boolean;
 
+    @Field(()=>Boolean, {nullable:true})
+    isStarred: boolean;
+}
+
+@ObjectType()
+export class StarredSnippet{
+    @Field(()=>String)
+    snippetId!: string;
+
+    @Field(()=>String)
+    userId!: string;
+
+    @Field(()=>DateTimeResolver)
+    createdAt!: Date;
+    
 }

@@ -3,12 +3,14 @@ import { AddSnippetInput, AppContext, MessageErrorResponse, SnippetInput } from 
 import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { v4 } from "uuid";
+import { setAuthUser } from "../middleware/setAuthUser";
 
 @Resolver()
 export class SnippetResolver{
     @Query(()=>[Snippet])
+    @UseMiddleware(setAuthUser)
     async snippets(
-        @Ctx() {redis} : AppContext
+        @Ctx() {redis,authUser} : AppContext
     ){
         const result: Snippet[] = [];
         const snippetsKeys = await redis.keys('snippet:*');
@@ -16,7 +18,8 @@ export class SnippetResolver{
             return result;
         }
         const snippetsData = await redis.mget(snippetsKeys);
-        snippetsData.forEach((value, index) => {
+        console.log(snippetsData);
+        await Promise.all(snippetsData.map(async (value, index) => {
             if (value){
                 const {name,content,isPrivate,language} = JSON.parse(value);
                 const snippet = {
@@ -26,11 +29,19 @@ export class SnippetResolver{
                     isPrivate:isPrivate,
                     language:language
                 } as Snippet;
+                if (authUser){
+                    if (await redis.exists(`star:${snippet.id}:${authUser}`)){
+                        snippet.isStarred = true;
+                    }else{
+                        snippet.isStarred = false;
+                    }
+                }
                 if (!snippet.isPrivate){
                     result.push(snippet);
                 }
             }
-        });
+        }));
+        console.log(result);
         return result;
     }
 
@@ -126,5 +137,23 @@ export class SnippetResolver{
         }
         await redis.set(snippetId, JSON.stringify(snippet));
         return snippet as Snippet;
+    }
+
+
+    @Mutation(()=>MessageErrorResponse)
+    @UseMiddleware(isAuth)
+    async starSnippet(
+        @Arg('snippet') snippetId: string,
+        @Ctx() {redis,authUser} : AppContext
+    ){
+        const snippet = await redis.get(snippetId);
+        if (!snippet || (JSON.parse(snippet) as Snippet).isPrivate){
+            return {error: "Snippet does not exists"};
+        }
+        await redis.del(`star:${snippetId}:${authUser}`);
+        await redis.set(`star:${snippetId}:${authUser}`, JSON.stringify(
+            {createdAt: Date.now()}
+        ));
+        return {message:"Snipped starred"};
     }
 }

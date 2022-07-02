@@ -4,7 +4,7 @@ import argon from "argon2";
 import { sendEmail } from "../util/sendEmail";
 import { v4 } from "uuid";
 import { isAuth } from "../middleware/isAuth";
-import { User } from "src/entites/User";
+import { User } from "../entites/User";
 
 
 @Resolver()
