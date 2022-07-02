@@ -1,7 +1,8 @@
 import { Snippet } from "../entites/Snippet";
-import { AppContext, MessageErrorResponse, SnippetInput } from "../types";
+import { AddSnippetInput, AppContext, MessageErrorResponse, SnippetInput } from "../types";
 import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
+import { v4 } from "uuid";
 
 @Resolver()
 export class SnippetResolver{
@@ -100,5 +101,24 @@ export class SnippetResolver{
         }else{
             return {error: "Snippet does not exist"}
         }
+    }
+
+    @Mutation(()=>Snippet)
+    @UseMiddleware(isAuth)
+    async addSnippet(
+        @Arg('input') input: AddSnippetInput,
+        @Ctx() {redis,authUser} : AppContext
+    ){
+        const snippetId = `snippet:${authUser}:${v4()}`;
+        const snippet = {
+            id: snippetId,
+            name: input.name,
+            content: input.content,
+            color: input.color,
+            language: input.language,
+            isPrivate: input.isPrivate
+        }
+        await redis.set(snippetId, JSON.stringify(snippet));
+        return snippet as Snippet;
     }
 }

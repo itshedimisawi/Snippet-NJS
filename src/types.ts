@@ -83,3 +83,43 @@ export class SnippetInput{ //for updating snippets
     isPrivate!: boolean;
 
 }
+
+
+@InputType()
+export class AddSnippetInput{ //for updating snippets
+    
+    @Field(()=>String)
+    language: string;
+
+    @Field(()=>String)
+    name!: string;
+
+    @Field(()=>String)
+    content!: string;
+
+    @Field(()=>String, {nullable:true})
+    color: string;
+
+    @Field(()=>Boolean)
+    isPrivate!: boolean;
+
+}
+
+
+@InputType()
+export class UserTeamInput{
+    @Field({nullable:true})
+    username?: string;
+    @Field({nullable:true})
+    teamId?: string;
+}
+
+@InputType()
+export class CreateTeamInput{
+
+    @Field()
+    name!: string;
+
+    @Field({nullable:true})
+    organisation?: string;
+}

@@ -8,13 +8,11 @@ export class User{
 
     @Field(()=> String)
     email!: string;
-    
+
     password!: string;
 
     @Field(()=>String)
     name!: string;
 
-    @Field(()=>String, {nullable: true})
-    team?: string;
 
 }

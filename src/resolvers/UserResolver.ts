@@ -16,7 +16,7 @@ export class UserResolver {
         const result = await redis.get(input.username);
         if (result){
             const data = JSON.parse(result);
-            const {email, password, name, team} = data;
+            const {email, password, name, teams} = data;
             if (await argon.verify(password, input.password)){
                 const token = v4();
                 await redis.set(`token:${token}`, input.username);
@@ -26,7 +26,6 @@ export class UserResolver {
                         email:email,
                         password:password,
                         name:name,
-                        team:team
                     },
                     token: token
                 }

@@ -6,6 +6,7 @@ import Redis from 'ioredis';
 import { AppContext } from "./types";
 import { UserResolver } from "./resolvers/UserResolver";
 import { SnippetResolver } from './resolvers/SnippetResolver';
+import { TeamResolver } from './resolvers/TeamResolver';
 
 const main = async () => {
     console.log("hello there");
@@ -23,8 +24,8 @@ const main = async () => {
     
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [UserResolver,SnippetResolver],
-            validate: false
+            resolvers: [UserResolver,SnippetResolver, TeamResolver],
+            validate: false,
         }),
         context: ({req,res}) : AppContext => ({req,res,redis:redisClient})
     });

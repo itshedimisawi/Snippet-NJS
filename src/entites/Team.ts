@@ -8,6 +8,6 @@ export class Team{
     @Field(()=>String)
     name!: string;
 
-    @Field(()=>String)
-    organisation: string;
+    @Field(()=>String, {nullable:true})
+    organisation?: string;
 }
