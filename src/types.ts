@@ -64,3 +64,22 @@ export class MessageErrorResponse{
     error?: string;
 }
 
+@InputType()
+export class SnippetInput{ //for updating snippets
+    
+    @Field(()=>String, {nullable:true})
+    language: string;
+
+    @Field(()=>String, {nullable:true})
+    name!: string;
+
+    @Field(()=>String, {nullable:true})
+    content!: string;
+
+    @Field(()=>String, {nullable:true})
+    color: string;
+
+    @Field(()=>Boolean, {nullable:true})
+    isPrivate!: boolean;
+
+}
