@@ -6,7 +6,9 @@ export class User{
     @Field(()=>String)
     username!: string;
 
-    @Field(()=>String)
+    @Field(()=> String)
+    email!: string;
+    
     password!: string;
 
     @Field(()=>String)

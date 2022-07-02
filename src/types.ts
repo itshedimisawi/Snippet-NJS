@@ -22,6 +22,10 @@ export class UserResponse{
 export class RegisterInput{
     @Field()
     username!: string;
+
+    @Field()
+    email!: string;
+
     @Field()
     password!: string;
     @Field()
@@ -35,3 +39,22 @@ export class LoginInput{
     @Field()
     password!: string;
 }
+
+@InputType()
+export class ForgotPasswordInput{
+    @Field()
+    username!: string;
+    @Field()
+    email!: string;
+}
+
+
+@ObjectType()
+export class MessageErrorResponse{
+    @Field(()=>String,{nullable:true})
+    message?: string;
+
+    @Field(()=>String,{nullable:true})
+    error?: string;
+}
+
