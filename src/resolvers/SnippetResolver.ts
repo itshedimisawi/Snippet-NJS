@@ -12,6 +12,9 @@ export class SnippetResolver{
     ){
         const result: Snippet[] = [];
         const snippetsKeys = await redis.keys('snippet:*');
+        if (snippetsKeys.length===0){
+            return result;
+        }
         const snippetsData = await redis.mget(snippetsKeys);
         snippetsData.forEach((value, index) => {
             if (value){
@@ -33,11 +36,14 @@ export class SnippetResolver{
 
     @Query(()=>[Snippet])
     @UseMiddleware(isAuth)
-    async mySnipp(
+    async mySnippets(
         @Ctx() {redis,authUser} : AppContext
     ){
         const result: Snippet[] = [];
         const snippetsKeys = await redis.keys(`snippet:${authUser}:*`);
+        if (snippetsKeys.length===0){
+            return result;
+        }
         const snippetsData = await redis.mget(snippetsKeys);
         snippetsData.forEach((value, index) => {
             if (value){

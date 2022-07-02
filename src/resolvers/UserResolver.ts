@@ -4,16 +4,30 @@ import argon from "argon2";
 import { sendEmail } from "../util/sendEmail";
 import { v4 } from "uuid";
 import { isAuth } from "../middleware/isAuth";
+import { User } from "src/entites/User";
 
 
 @Resolver()
 export class UserResolver {
+
+    @Query(()=>UserResponse)
+    @UseMiddleware(isAuth)
+    async me(
+        @Ctx(){redis, authUser} : AppContext
+    ){
+        const user = await redis.get(`user:${authUser!}`);
+        if (!user){
+            return {error: "Could't retrieve user data"};
+        }
+        console.log(user);
+        return {user:{...JSON.parse(user),username:authUser} as User};
+    }
     @Query(()=> UserResponse)
     async login(
         @Arg('input') input:LoginInput,
         @Ctx() {redis}: AppContext
     ):Promise<UserResponse>{
-        const result = await redis.get(input.username);
+        const result = await redis.get(`user:${input.username}`);
         if (result){
             const data = JSON.parse(result);
             const {email, password, name, teams} = data;
@@ -46,11 +60,11 @@ export class UserResolver {
         @Arg("input") input: RegisterInput, 
         @Ctx() {redis}: AppContext,
     ):Promise<UserResponse>{
-        if (await redis.exists(input.username)){
+        if (await redis.exists(`user:${input.username}`)){
             return {error: "Username already taken"}
         }else{
             const hashed_password = await argon.hash(input.password)
-            await redis.set(input.username ,JSON.stringify({email:input.email, password:hashed_password,name:input.name}));
+            await redis.set(`user:${input.username}` ,JSON.stringify({email:input.email, password:hashed_password,name:input.name}));
             return {user:{
                 username: input.username,
                 email: input.email,
@@ -65,7 +79,7 @@ export class UserResolver {
         @Arg("input") input : ForgotPasswordInput,
         @Ctx() {redis} : AppContext,
     ):Promise<MessageErrorResponse>{
-        const result = await redis.get(input.username);
+        const result = await redis.get(`user:${input.username}`);
         if (result){
             const data = JSON.parse(result);
             const {email} = data;
@@ -92,10 +106,10 @@ export class UserResolver {
     ):Promise<MessageErrorResponse>{
         const username = await redis.get(`password-reset:${token}`)
         if (username){
-            const userData = await redis.get(username)
+            const userData = await redis.get(`user:${username}`)
             if (userData){
                 const {email,name,team} = JSON.parse(userData)
-                await redis.set(username, 
+                await redis.set(`user:${username}`, 
                     JSON.stringify({
                         email:email,
                         password: await argon.hash(newPassword),
@@ -110,11 +124,4 @@ export class UserResolver {
         return {error:"Token expired"}
     }
 
-    @Query(()=>String)
-    @UseMiddleware(isAuth)
-    async hello(
-        @Ctx() {authUser}: AppContext
-    ):Promise<String>{
-        return `hi ${authUser}`
-    }
 }

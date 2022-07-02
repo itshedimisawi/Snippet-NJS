@@ -15,20 +15,20 @@ export class TeamResolver{
         @Arg('input') input: CreateTeamInput,
         @Ctx() {redis, authUser}: AppContext
     ){
-        const teamId = `team:${v4()}`;
-        const snippet = {
+        const teamId = v4();
+        const team = {
             id: teamId,
             name: input.name,
             organisation: input.organisation
         }
-        await redis.set(teamId, JSON.stringify(snippet));
+        await redis.set(`team:${teamId}`, JSON.stringify(team));
         await redis.set(`userteam:${authUser}:${teamId}`,
             JSON.stringify({
                 role: "admin",
                 joinedAt: Date.now()
             })
         );
-        return snippet as Team;
+        return team as Team;
     }
 
     @Query(()=>[UserTeam])
@@ -74,7 +74,7 @@ export class TeamResolver{
         if (role!=="admin"){
             return {error: "You don't have permission to manage this team"};
         }
-        if (!await redis.exists(username)){
+        if (!await redis.exists(`user:${username}`)){
             return {error: "User does not exist"};
         }
         if (!await redis.exists(`team:${teamId}`)){
