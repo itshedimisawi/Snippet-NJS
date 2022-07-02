@@ -7,7 +7,7 @@ export class Snippet{
     @Field(()=>String)
     id!: string;
 
-    @Field(()=>String)
+    @Field(()=>String, {nullable:true})
     language: string;
 
     @Field(()=>String)
@@ -16,12 +16,10 @@ export class Snippet{
     @Field(()=>String)
     content!: string;
 
-    @Field(()=>String)
+    @Field(()=>String, {nullable:true})
     color: string;
 
     @Field(()=>Boolean)
     isPrivate!: boolean;
 
-    @Field(()=>User)
-    user: User;
 }

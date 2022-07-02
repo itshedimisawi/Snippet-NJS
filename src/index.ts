@@ -5,6 +5,7 @@ import { buildSchema } from "type-graphql";
 import Redis from 'ioredis';
 import { AppContext } from "./types";
 import { UserResolver } from "./resolvers/UserResolver";
+import { SnippetResolver } from './resolvers/SnippetResolver';
 
 const main = async () => {
     console.log("hello there");
@@ -22,7 +23,7 @@ const main = async () => {
     
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [UserResolver],
+            resolvers: [UserResolver,SnippetResolver],
             validate: false
         }),
         context: ({req,res}) : AppContext => ({req,res,redis:redisClient})

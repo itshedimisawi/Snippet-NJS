@@ -1,8 +1,9 @@
 import { AppContext, ForgotPasswordInput, MessageErrorResponse, LoginInput, RegisterInput, UserResponse } from "../types";
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import argon from "argon2";
 import { sendEmail } from "../util/sendEmail";
 import { v4 } from "uuid";
+import { isAuth } from "../middleware/isAuth";
 
 
 @Resolver()
@@ -17,7 +18,18 @@ export class UserResolver {
             const data = JSON.parse(result);
             const {email, password, name, team} = data;
             if (await argon.verify(password, input.password)){
-                return {user: {username:input.username,email:email,password:password,name:name,team:team}}
+                const token = v4();
+                await redis.set(`token:${token}`, input.username);
+                return {
+                    user: {
+                        username:input.username,
+                        email:email,
+                        password:password,
+                        name:name,
+                        team:team
+                    },
+                    token: token
+                }
             }else{
                 return  {
                     error: "Incorrect password"
@@ -97,5 +109,13 @@ export class UserResolver {
             return {error: "User no longer exist"}
         }
         return {error:"Token expired"}
+    }
+
+    @Query(()=>String)
+    @UseMiddleware(isAuth)
+    async hello(
+        @Ctx() {authUser}: AppContext
+    ):Promise<String>{
+        return `hi ${authUser}`
     }
 }

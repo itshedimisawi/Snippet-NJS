@@ -6,7 +6,8 @@ import { User } from "./entites/User";
 export type AppContext = {
     req: Request,
     res: Response,
-    redis: Redis
+    redis: Redis,
+    authUser?: string
 }
 
 @ObjectType()
@@ -16,7 +17,12 @@ export class UserResponse{
 
     @Field(()=>String,{nullable:true})
     error?: string;
+
+    @Field(()=>String,{nullable:true})
+    token?: string;
 }
+
+
 
 @InputType()
 export class RegisterInput{
